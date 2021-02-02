@@ -1,0 +1,1 @@
+from .sz_credit import SZ_Captcha

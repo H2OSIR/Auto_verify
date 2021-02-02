@@ -20,7 +20,6 @@ cut_around : 环切
 distance : 计算两个向量（数据点或样本）的欧式距离
 loadTrainSet : 读取训练集.
 write_csv : 将list写入csv
-classify_KNN : KNN算法识别验证码
 
 @author：H2OSIR
 """
@@ -28,17 +27,12 @@ classify_KNN : KNN算法识别验证码
 
 import csv
 import sys
-import operator
 import numpy as np
 import pandas as pd
 from os import listdir
 from PIL import Image
-from io import BytesIO
-import joblib
-# from sklearn.externals import joblib
-# from sklearn.decomposition import PCA
 from requests.sessions import Session
-from sklearn.neighbors import KNeighborsClassifier
+
 
 # 下载图片
 def download_image(url, **kwargs):
@@ -365,14 +359,13 @@ def cut_mean(image, count=4):
     return images   # 几张图可能大小不一致
 
 # 计算距离
-def distance(array1, array2, axis=None):
+def distance(array1, array2):
     """计算两个数组矩阵的欧式距离;
 
     axis=0，求每列的
     axis=1，求每行的
     """
 
-    # distance = (np.sum((array1 - array2), axis)** 2) ** 0.5
     distance = np.sqrt(np.sum(np.power(array1 - array2, 2)))
 
     return distance
@@ -422,7 +415,7 @@ def loadTrainSet(fileName):
     else:
         train = pd.read_csv(fileName)
         trains = train.values[:, 1:]
-        labels = train.ix[:, 0]
+        labels = train.iloc[:, 0]
 
     return trains, labels
 
@@ -451,32 +444,7 @@ def classify(image, model):
     unArray = two_Value(image, 'list')
     unArray = [unArray, ]
     unArray = np.array(unArray) # 转换成一维数组
-    # 加载模型
-    # cly = joblib.load(model)
     x = model.predict(unArray)
 
     return x[0]
-
-
-if __name__ == '__main__':
-
-    img = Image.open('example/01/6bbz.png')
-
-    img = twoValueImage(img, 100)
-
-    img = clear_frame(img, 2)
-
-    img = clear_noise(img, (4, 4))
-
-    # # # img.save('test.png')
-    # # img.show()
-    # images = cut_mean(img, 4)
-    #
-    # for i, each in enumerate(images):
-    #     images[i] = format_size(each, (25, 25))
-    # for i, each in enumerate(images):
-    #     each.save('%s.png' % str(i))
-
-
-
 
